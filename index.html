@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rekap Potongan Sift</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: Arial, sans-serif; }
+    body { background: #e0e0e0; padding: 5px; }
+  .container { max-width: 1400px; margin: 0 auto; }
+    h1 { text-align: center; margin: 10px 0; font-size: 18px; background: #000; color: #fff; padding: 8px; }
+  .blok-hari { background: white; border: 3px solid #000; margin-bottom: 10px; }
+  .header-tgl { background: #00bcd4; color: #000; padding: 5px; font-weight: bold; border-bottom: 2px solid #000; display: flex; justify-content: space-between; align-items: center; }
+  .tebusan-row { background: #ffff00; border-bottom: 2px solid #000; padding: 10px; }
+  .tebusan-row > label { font-weight: bold; font-size: 14px; display: block; margin-bottom: 8px; }
+  .tebusan-flex { display: flex; gap: 8px; align-items: flex-start; }
+  .jam-box { display: flex; flex-direction: column; gap: 3px; }
+  .jam-box span { font-size: 11px; font-weight: bold; }
+  .jam-box input[type="time"] { width: 110px; height: 32px; font-weight: normal; font-size: 13px; background: #fff; border: 3px solid #000; border-radius: 6px; padding: 4px 8px; }
+  .tebusan-flex textarea { flex: 1; min-height: 45px; background: #fff; border: 3px solid #000; border-radius: 6px; padding: 8px 10px; text-align: left; font-size: 14px; font-family: Arial, sans-serif; resize: vertical; outline: none; white-space: pre-wrap; word-wrap: break-word; }
+  .jam-box input[type="time"]:focus,.tebusan-flex textarea:focus { border-color: #2196f3; }
+    table { width: 100%; border-collapse: collapse; font-size: 11px; }
+    th, td { border: 1px solid #000; padding: 3px; text-align: center; }
+    th { font-weight: bold; }
+  .sift1-head { background: #c8e6c9; }
+  .sift2-head { background: #bbdefb; }
+  .sift1 { background: #e8f5e9; }
+  .sift2 { background: #e3f2fd; }
+    input, select, textarea { width: 100%; border: none; background: transparent; text-align: center; font-size: 11px; }
+    input[type="number"] { -moz-appearance: textfield; }
+    input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; }
+  .total-row td { background: #fff9c4; font-weight: bold; }
+  .selisih-row td { background: #c8e6c9; font-weight: bold; }
+  .btn-kecil { background: #4caf50; color: white; border: 1px solid #000; padding: 1px 4px; font-size: 10px; margin: 1px; cursor: pointer; }
+  .btn-hapus { background: #f44336; }
+  .rekap-minggu { background: #ff9800; color: #000; border: 3px solid #000; margin: 15px 0; padding: 5px; }
+  .rekap-bulan { background: #1a237e; color: white; border: 3px solid #000; margin: 15px 0; padding: 8px; }
+  .rekap-tahun { background: #2e7d32; color: white; border: 3px solid #000; margin: 15px 0; padding: 8px; }
+  .rekap-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; text-align: center; margin-top: 5px; }
+  .rekap-item { background: rgba(255,255,255,0.2); padding: 5px; border: 1px solid #000; }
+  .rekap-item h3 { font-size: 16px; }
+  .rekap-item p { font-size: 10px; }
+  .rekap-detail { display: flex; gap: 0; background: #fff; color: #000; border-top: 2px solid #000; }
+  .rekap-detail-box { flex: 1; padding: 8px; text-align: left; border: 1px solid #000; }
+  .rekap-detail-box h4 { font-size: 14px; margin-bottom: 4px; }
+  .rekap-detail-box p { font-size: 13px; margin: 2px 0; }
+  .btn { background: #2196f3; color: white; border: 2px solid #000; padding: 8px; width: 100%; margin: 5px 0; font-weight: bold; cursor: pointer; }
+  .btn-hijau { background: #4caf50; }
+  .btn-merah { background: #f44336; }
+  .btn-oranye { background: #ff9800; color: #000; }
+
+   /* Filter periode sejajar sampingan */
+  .filter-periode {
+     background: #fff;
+     border: 3px solid #000;
+     padding: 10px;
+     margin: 10px 0;
+     display: flex;
+     justify-content: center;
+     align-items: center;
+     gap: 10px;
+     flex-wrap: wrap;
+   }
+  .filter-periode select {
+     padding: 6px 10px;
+     border: 2px solid #000;
+     font-weight: bold;
+     font-size: 14px;
+     background: #fff;
+     width: auto;
+   }.kosong { text-align: center; padding: 20px; background: white; border: 3px solid #000; font-style: italic; }
+  .shift-select { margin-left: 5px; padding: 2px 4px; font-size: 10px; border: 1px solid #000; background: white; width: auto; display: inline-block; }
+  .backup-area { display: flex; gap: 5px; margin-top: 10px; }
+  .backup-area.btn { margin: 0; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1 id="judul">REKAP POTONGAN SIFT</h1>
+
+    <div class="filter-periode">
+      <b>Pilih Periode:</b>
+      <select id="bulan">
+        <option value="01">Januari</option><option value="02">Februari</option><option value="03">Maret</option>
+        <option value="04">April</option><option value="05">Mei</option><option value="06">Juni</option>
+        <option value="07">Juli</option><option value="08">Agustus</option><option value="09">September</option>
+        <option value="10">Oktober</option><option value="11">November</option><option value="12">Desember</option>
+      </select>
+      <select id="tahun"></select>
+    </div>
+
+    <div id="daftar-hari"></div>
+    <button class="btn btn-hijau" onclick="tambahHari()">+ TAMBAH HARI</button>
+    <div id="rekap-mingguan"></div>
+
+    <div class="rekap-bulan">
+      <h2 style="text-align:center;font-size:16px;" id="judul-bulan">REKAP TOTAL BULAN</h2>
+      <div class="rekap-grid">
+        <div class="rekap-item"><p>TOTAL SIFT ODI RIZA</p><h3 id="totalBulanOdi">0</h3></div>
+        <div class="rekap-item"><p>TOTAL AMAD NOLA</p><h3 id="totalBulanAmad">0</h3></div>
+        <div class="rekap-item"><p>SELISIH PER BULAN</p><h3 id="selisihBulan">0</h3></div>
+      </div>
+      <div class="rekap-detail">
+        <div class="rekap-detail-box">
+          <h4>Odi Riza</h4>
+          <p>SKM: <b id="bulanOdiSKM">0</b></p>
+          <p>SKT: <b id="bulanOdiSKT">0</b></p>
+        </div>
+        <div class="rekap-detail-box">
+          <h4>Amad Nola</h4>
+          <p>SKM: <b id="bulanAmadSKM">0</b></p>
+          <p>SKT: <b id="bulanAmadSKT">0</b></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="rekap-tahun">
+      <h2 style="text-align:center;font-size:16px;" id="judul-tahun">REKAP TOTAL TAHUN</h2>
+      <div class="rekap-grid">
+        <div class="rekap-item"><p>TOTAL SIFT ODI RIZA</p><h3 id="totalTahunOdi">0</h3></div>
+        <div class="rekap-item"><p>TOTAL AMAD NOLA</p><h3 id="totalTahunAmad">0</h3></div>
+        <div class="rekap-item"><p>SELISIH PER TAHUN</p><h3 id="selisihTahun">0</h3></div>
+      </div>
+      <div class="rekap-detail">
+        <div class="rekap-detail-box">
+          <h4>Odi Riza</h4>
+          <p>SKM: <b id="tahunOdiSKM">0</b></p>
+          <p>SKT: <b id="tahunOdiSKT">0</b></p>
+        </div>
+        <div class="rekap-detail-box">
+          <h4>Amad Nola</h4>
+          <p>SKM: <b id="tahunAmadSKM">0</b></p>
+          <p>SKT: <b id="tahunAmadSKT">0</b></p>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn" onclick="exportData()">DOWNLOAD EXCEL CSV</button>
+
+    <div class="backup-area">
+      <button class="btn btn-oranye" onclick="backupJSON()">BACKUP JSON</button>
+      <button class="btn" onclick="document.getElementById('fileRestore').click()">RESTORE JSON</button>
+      <input type="file" id="fileRestore" accept=".json" style="display:none" onchange="restoreJSON(event)">
+    </div>
+
+    <button class="btn btn-merah" onclick="hapusSemuaData()">HAPUS SEMUA DATA</button>
+  </div>
+
+  <script>
+    let idHari = 0;
+    let dataApp = JSON.parse(localStorage.getItem('rekapPotongan')) || {};
+    let bulanAktif = '05';
+    let tahunAktif = '2026';
+    const namaBulan = ['','Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+
+    function isiOpsiTahun() {
+      const selectTahun = document.getElementById('tahun');
+      const tahunSekarang = new Date().getFullYear();
+      for (let thn = 2025; thn <= tahunSekarang + 10; thn++) {
+        let option = document.createElement('option');
+        option.value = thn;
+        option.textContent = thn;
+        selectTahun.appendChild(option);
+      }
+    }
+    isiOpsiTahun();
+    document.getElementById('bulan').value = bulanAktif;
+    document.getElementById('tahun').value = tahunAktif;
+    document.getElementById('bulan').onchange = gantiPeriode;
+    document.getElementById('tahun').onchange = gantiPeriode;
+
+    function gantiPeriode() {
+      bulanAktif = document.getElementById('bulan').value;
+      tahunAktif = document.getElementById('tahun').value;
+      document.getElementById('judul').textContent = `REKAP POTONGAN SIFT - ${namaBulan[+bulanAktif]} ${tahunAktif}`;
+      renderHari();
+    }
+    function getKey() { return `${tahunAktif}-${bulanAktif}`; }
+    function parseJenis(jenis) {
+      jenis = (jenis || "").toLowerCase();
+      if(jenis.includes("skm")) return "SKM";
+      if(jenis.includes("skt")) return "SKT";
+      return "";
+    }
+
+    function simpanData() {
+      const key = getKey();
+      if(!dataApp[key]) dataApp[key] = [];
+      dataApp[key] = [];
+      document.querySelectorAll('.blok-hari').forEach(blok => {
+        const dataHari = {
+          id: blok.id,
+          tanggal: blok.dataset.tanggal,
+          jamTebusan: blok.querySelector('.jam-tebusan').value,
+          tebusan: blok.querySelector('.tebusan').value,
+          shiftOdi: blok.querySelector('.shift-odi').value,
+          shiftAmad: blok.querySelector('.shift-amad').value,
+          sift1: [], sift2: []
+        };
+        blok.querySelectorAll('.tbody-sift1 tr').forEach(row => {
+          const inputs = row.querySelectorAll('input');
+          if(inputs.length >= 3) dataHari.sift1.push({ jam: inputs[0].value, jml: inputs[1].value, jenis: inputs[2].value });
+        });
+        blok.querySelectorAll('.tbody-sift2 tr').forEach(row => {
+          const inputs = row.querySelectorAll('input');
+          if(inputs.length >= 3) dataHari.sift2.push({ jam: inputs[0].value, jml: inputs[1].value, jenis: inputs[2].value });
+        });
+        dataApp[key].push(dataHari);
+      });
+      localStorage.setItem('rekapPotongan', JSON.stringify(dataApp));
+      hitungSemua();
+    }
+
+    function tambahBarisPotongan(btn, sift) {
+      const tbody = btn.closest('.blok-hari').querySelector(`.tbody-${sift}`);
+      const row = tbody.insertRow();
+      row.innerHTML = `
+        <td class="${sift}"><input type="text" placeholder="Jam" oninput="simpanData()"></td>
+        <td class="${sift}"><input type="number" class="jml-${sift}" value="0" oninput="simpanData()"></td>
+        <td class="${sift}"><input type="text" placeholder="Jenis" oninput="simpanData()"></td>
+      `;
+      simpanData();
+    }
+
+    function templateHari(data) {
+      const d = new Date(data.tanggal);
+      const hari = d.toLocaleDateString('id-ID', { weekday: 'long' });
+      const tglFormat = d.toLocaleDateString('id-ID',{day:'2-digit',month:'2-digit',year:'numeric'});
+      let barisSift1 = '', barisSift2 = '';
+      if(data.sift1.length === 0) data.sift1.push({jam:'',jml:0,jenis:''});
+      if(data.sift2.length === 0) data.sift2.push({jam:'',jml:0,jenis:''});
+      data.sift1.forEach(p => {
+        barisSift1 += `<tr>
+          <td class="sift1"><input type="text" value="${p.jam}" oninput="simpanData()"></td>
+          <td class="sift1"><input type="number" class="jml-sift1" value="${p.jml}" oninput="simpanData()"></td>
+          <td class="sift1"><input type="text" value="${p.jenis}" oninput="simpanData()"></td>
+        </tr>`;
+      });
+      data.sift2.forEach(p => {
+        barisSift2 += `<tr>
+          <td class="sift2"><input type="text" value="${p.jam}" oninput="simpanData()"></td>
+          <td class="sift2"><input type="number" class="jml-sift2" value="${p.jml}" oninput="simpanData()"></td>
+          <td class="sift2"><input type="text" value="${p.jenis}" oninput="simpanData()"></td>
+        </tr>`;
+      });
+
+      return `
+      <div class="blok-hari" id="${data.id}" data-tanggal="${data.tanggal}">
+        <div class="header-tgl">
+          <span>Tanggal / hari: ${hari} <input type="date" value="${data.tanggal}" onchange="updateHari(this,'${data.id}')" style="width:120px;background:white;color:black;font-weight:bold;"></span>
+          <button class="btn-kecil btn-hapus" onclick="hapusHari('${data.id}')">HAPUS</button>
+        </div>
+        <div class="tebusan-row">
+          <label>Tebusan Datang</label>
+          <div class="tebusan-flex">
+            <div class="jam-box">
+              <span>Jam</span>
+              <input type="time" class="jam-tebusan" value="${data.jamTebusan || ''}" oninput="simpanData()">
+            </div>
+            <textarea class="tebusan" placeholder="Ketik apa yang ditebus..." oninput="simpanData()">${data.tebusan}</textarea>
+          </div>
+        </div>
+        <table>
+          <tr>
+            <th rowspan="2" style="width:70px">Tanggal / hari</th>
+            <th colspan="3" class="sift1-head">Sift Odi Riza <select class="shift-odi shift-select" onchange="simpanData()"><option value="Pagi" ${data.shiftOdi==='Pagi'?'selected':''}>Pagi</option><option value="Siang" ${data.shiftOdi==='Siang'?'selected':''}>Siang</option></select></th>
+            <th colspan="3" class="sift2-head">Amad Nola <select class="shift-amad shift-select" onchange="simpanData()"><option value="Pagi" ${data.shiftAmad==='Pagi'?'selected':''}>Pagi</option><option value="Siang" ${data.shiftAmad==='Siang'?'selected':''}>Siang</option></select></th>
+          </tr>
+          <tr>
+            <th class="sift1-head">Jam</th><th class="sift1-head">Jml Potongan</th><th class="sift1-head">Jenis</th>
+            <th class="sift2-head">Jam</th><th class="sift2-head">Jml Potongan</th><th class="sift2-head">Jenis</th>
+          </tr>
+          <tr>
+            <td rowspan="20">${hari}<br>${tglFormat}</td>
+            <td colspan="3" style="padding:0;border:0;"><table style="width:100%;border:0;"><tbody class="tbody-sift1">${barisSift1}</tbody></table></td>
+            <td colspan="3" style="padding:0;border:0;"><table style="width:100%;border:0;"><tbody class="tbody-sift2">${barisSift2}</tbody></table></td>
+          </tr>
+          <tr>
+            <td colspan="4"><button class="btn-kecil" onclick="tambahBarisPotongan(this,'sift1')">+ Baris Odi Riza</button></td>
+            <td colspan="3"><button class="btn-kecil" onclick="tambahBarisPotongan(this,'sift2')">+ Baris Amad Nola</button></td>
+          </tr>
+          <tr class="total-row">
+            <td>Total Potongan</td><td class="sift1"></td><td class="sift1 totalOdi">0</td><td class="sift1"></td>
+            <td class="sift2">Total Potongan</td><td class="sift2 totalAmad">0</td><td class="sift2"></td>
+          </tr>
+          <tr class="selisih-row">
+            <td>Selisih Potongan</td><td colspan="6" class="selisihHari">0</td>
+          </tr>
+        </table>
+      </div>`;
+    }
+
+    function renderHari() {
+      const key = getKey();
+      const dataBulan = dataApp[key] || [];
+      const container = document.getElementById('daftar-hari');
+      container.innerHTML = '';
+      if(dataBulan.length === 0) {
+        container.innerHTML = '<div class="kosong">Belum ada data di bulan ini. Klik + TAMBAH HARI</div>';
+      } else {
+        dataBulan.forEach(data => {
+          container.insertAdjacentHTML('beforeend', templateHari(data));
+        });
+      }
+      hitungSemua();
+    }
+
+    function tambahHari() {
+      idHari++;
+      const key = getKey();
+      if(!dataApp[key]) dataApp[key] = [];
+      let tglBaru = new Date(tahunAktif, +bulanAktif-1, 1);
+      if(dataApp[key].length > 0) {
+        const tglTerakhir = new Date(dataApp[key][dataApp[key].length-1].tanggal);
+        tglTerakhir.setDate(tglTerakhir.getDate() + 1);
+        tglBaru = tglTerakhir;
+      }
+      const tglStr = tglBaru.toISOString().split('T')[0];
+      const dataBaru = { id: `hari-${idHari}`, tanggal: tglStr, jamTebusan: '', tebusan: '', shiftOdi: 'Pagi', shiftAmad: 'Pagi', sift1: [], sift2: [] };
+      document.getElementById('daftar-hari').insertAdjacentHTML('beforeend', templateHari(dataBaru));
+      simpanData();
+    }
+
+    function hapusHari(id) {
+      if(confirm('Yakin hapus data hari ini?')) {
+        document.getElementById(id).remove();
+        simpanData();
+      }
+    }
+    function updateHari(el, id) {
+      const blok = document.getElementById(id);
+      blok.dataset.tanggal = el.value;
+      const d = new Date(el.value);
+      blok.querySelector('td').innerHTML = `${d.toLocaleDateString('id-ID',{weekday:'long'})}<br>${d.toLocaleDateString('id-ID',{day:'2-digit',month:'2-digit',year:'numeric'})}`;
+      simpanData();
+    }
+
+    function hitungSemua() {
+      const key = getKey();
+      const dataBulan = dataApp[key] || [];
+      let totalBulanOdi = 0, totalBulanAmad = 0;
+      let bulanOdiSKM = 0, bulanOdiSKT = 0, bulanAmadSKM = 0, bulanAmadSKT = 0;
+      let dataMinggu = {};
+
+      document.querySelectorAll('.blok-hari').forEach((blok, idx) => {
+        const data = dataBulan[idx];
+        if(!data) return;
+        const tanggal = new Date(data.tanggal);
+        const mingguKe = Math.ceil((tanggal.getDate() + new Date(tanggal.getFullYear(), tanggal.getMonth(), 1).getDay()) / 7);
+        let totalOdi = 0, totalAmad = 0;
+        let odiSKM = 0, odiSKT = 0, amadSKM = 0, amadSKT = 0;
+        data.sift1.forEach(p => {
+          const jml = Number(p.jml) || 0;
+          totalOdi += jml;
+          if(parseJenis(p.jenis) === "SKM") odiSKM += jml;
+          if(parseJenis(p.jenis) === "SKT") odiSKT += jml;
+        });
+        data.sift2.forEach(p => {
+          const jml = Number(p.jml) || 0;
+          totalAmad += jml;
+          if(parseJenis(p.jenis) === "SKM") amadSKM += jml;
+          if(parseJenis(p.jenis) === "SKT") amadSKT += jml;
+        });
+        blok.querySelector('.totalOdi').textContent = totalOdi;
+        blok.querySelector('.totalAmad').textContent = totalAmad;
+        blok.querySelector('.selisihHari').textContent = totalOdi - totalAmad;
+        totalBulanOdi += totalOdi;
+        totalBulanAmad += totalAmad;
+        bulanOdiSKM += odiSKM;
+        bulanOdiSKT += odiSKT;
+        bulanAmadSKM += amadSKM;
+        bulanAmadSKT += amadSKT;
+        if (!dataMinggu[mingguKe]) dataMinggu[mingguKe] = {odi:0, amad:0, tgl:[], skmOdi:0, sktOdi:0, skmAmad:0, sktAmad:0};
+        dataMinggu[mingguKe].odi += totalOdi;
+        dataMinggu[mingguKe].amad += totalAmad;
+        dataMinggu[mingguKe].skmOdi += odiSKM;
+        dataMinggu[mingguKe].sktOdi += odiSKT;
+        dataMinggu[mingguKe].skmAmad += amadSKM;
+        dataMinggu[mingguKe].sktAmad += amadSKT;
+        dataMinggu[mingguKe].tgl.push(tanggal.getDate());
+      });
+
+      let htmlMinggu = '';
+      Object.keys(dataMinggu).sort((a,b)=>a-b).forEach(mingguKe => {
+        const d = dataMinggu[mingguKe];
+        const selisih = d.odi - d.amad;
+        const tglMin = Math.min(...d.tgl);
+        const tglMax = Math.max(...d.tgl);
+        htmlMinggu += `
+        <div class="rekap-minggu">
+          <strong>REKAP MINGGU KE-${mingguKe} : TGL ${tglMin}-${tglMax} ${namaBulan[+bulanAktif]} ${tahunAktif}</strong>
+          <div class="rekap-grid">
+            <div class="rekap-item"><p>TOTAL ODI RIZA</p><h3>${d.odi}</h3></div>
+            <div class="rekap-item"><p>TOTAL AMAD NOLA</p><h3>${d.amad}</h3></div>
+            <div class="rekap-item"><p>SELISIH PER MINGGU</p><h3>${selisih}</h3></div>
+          </div>
+          <div class="rekap-detail">
+            <div class="rekap-detail-box">
+              <h4>Odi Riza</h4>
+              <p>SKM: <b>${d.skmOdi}</b></p>
+              <p>SKT: <b>${d.sktOdi}</b></p>
+            </div>
+            <div class="rekap-detail-box">
+              <h4>Amad Nola</h4>
+              <p>SKM: <b>${d.skmAmad}</b></p>
+              <p>SKT: <b>${d.sktAmad}</b></p>
+            </div>
+          </div>
+        </div>`;
+      });
+      document.getElementById('rekap-mingguan').innerHTML = htmlMinggu;
+
+      document.getElementById('judul-bulan').textContent = `REKAP TOTAL BULAN ${namaBulan[+bulanAktif].toUpperCase()} ${tahunAktif}`;
+      document.getElementById('totalBulanOdi').textContent = totalBulanOdi;
+      document.getElementById('totalBulanAmad').textContent = totalBulanAmad;
+      document.getElementById('selisihBulan').textContent = totalBulanOdi - totalBulanAmad;
+      document.getElementById('bulanOdiSKM').textContent = bulanOdiSKM;
+      document.getElementById('bulanOdiSKT').textContent = bulanOdiSKT;
+      document.getElementById('bulanAmadSKM').textContent = bulanAmadSKM;
+      document.getElementById('bulanAmadSKT').textContent = bulanAmadSKT;
+
+      let totalTahunOdi = 0, totalTahunAmad = 0;
+      let tahunOdiSKM = 0, tahunOdiSKT = 0, tahunAmadSKM = 0, tahunAmadSKT = 0;
+      Object.keys(dataApp).forEach(k => {
+        if(k.startsWith(tahunAktif)) {
+          dataApp[k].forEach(h => {
+            h.sift1.forEach(p => {
+              const jml = Number(p.jml) || 0;
+              totalTahunOdi += jml;
+              if(parseJenis(p.jenis) === "SKM") tahunOdiSKM += jml;
+              if(parseJenis(p.jenis) === "SKT") tahunOdiSKT += jml;
+            });
+            h.sift2.forEach(p => {
+              const jml = Number(p.jml) || 0;
+              totalTahunAmad += jml;
+              if(parseJenis(p.jenis) === "SKM") tahunAmadSKM += jml;
+              if(parseJenis(p.jenis) === "SKT") tahunAmadSKT += jml;
+            });
+          });
+        }
+      });
+      document.getElementById('judul-tahun').textContent = `REKAP TOTAL TAHUN ${tahunAktif}`;
+      document.getElementById('totalTahunOdi').textContent = totalTahunOdi;
+      document.getElementById('totalTahunAmad').textContent = totalTahunAmad;
+      document.getElementById('selisihTahun').textContent = totalTahunOdi - totalTahunAmad;
+      document.getElementById('tahunOdiSKM').textContent = tahunOdiSKM;
+      document.getElementById('tahunOdiSKT').textContent = tahunOdiSKT;
+      document.getElementById('tahunAmadSKM').textContent = tahunAmadSKM;
+      document.getElementById('tahunAmadSKT').textContent = tahunAmadSKT;
+    }
+
+    function exportData() {
+      const key = getKey();
+      const dataBulan = dataApp[key] || [];
+      let csv = 'Tanggal,Hari,Shift Odi,Shift Amad,Jam Tebusan,Tebusan,Jam Odi,Jml Odi,Jenis Odi,Jam Amad,Jml Amad,Jenis Amad,Total Odi,Total Amad,Selisih Hari\n';
+      dataBulan.forEach(h => {
+        const tgl = h.tanggal;
+        const hari = new Date(tgl).toLocaleDateString('id-ID',{weekday:'long'});
+        const jamTebusan = h.jamTebusan;
+        const tebusan = h.tebusan;
+        const shiftOdi = h.shiftOdi || 'Pagi';
+        const shiftAmad = h.shiftAmad || 'Pagi';
+        let totalOdi = 0, totalAmad = 0;
+        h.sift1.forEach(p => totalOdi += Number(p.jml) || 0);
+        h.sift2.forEach(p => totalAmad += Number(p.jml) || 0);
+        const maxRow = Math.max(h.sift1.length, h.sift2.length);
+        for(let i=0; i<maxRow; i++){
+          const r1 = h.sift1[i] || {};
+          const r2 = h.sift2[i] || {};
+          csv += `${tgl},${hari},${shiftOdi},${shiftAmad},${jamTebusan},"${tebusan.replace(/"/g,'""')}",${r1.jam||''},${r1.jml||0},${r1.jenis||''},${r2.jam||''},${r2.jml||0},${r2.jenis||''},,,\n`;
+        }
+        csv += `${tgl},${hari},${shiftOdi},${shiftAmad},${jamTebusan},"${tebusan.replace(/"/g,'""')}",,,,,,${totalOdi},${totalAmad},${totalOdi-totalAmad}\n`;
+      });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([csv], {type: 'text/csv'}));
+      a.download = `Rekap_Potongan_${namaBulan[+bulanAktif]}_${tahunAktif}.csv`; a.click();
+    }
+
+    function backupJSON() {
+      const dataStr = JSON.stringify(dataApp, null, 2);
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([dataStr], {type: 'application/json'}));
+      a.download = `Backup_Rekap_${new Date().toISOString().split('T')[0]}.json`;
+      a.click();
+      alert('Backup JSON berhasil di-download!');
+    }
+
+    function restoreJSON(event) {
+      const file = event.target.files[0];
+      if(!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const data = JSON.parse(e.target.result);
+          if(confirm('Yakin restore data ini? Data lama akan tertimpa!')) {
+            dataApp = data;
+            localStorage.setItem('rekapPotongan', JSON.stringify(dataApp));
+            renderHari();
+            alert('Restore berhasil!');
+          }
+        } catch(err) {
+          alert('File JSON tidak valid!');
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function hapusSemuaData() {
+      if(confirm('Yakin hapus SEMUA data? Nggak bisa dibalikin!')) {
+        localStorage.removeItem('rekapPotongan');
+        location.reload();
+      }
+    }
+    gantiPeriode();
+  </script>
+</body>
+</html>
